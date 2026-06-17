@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LacrosseHub — PLL Scores, Standings, Schedule & Stats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700;800&family=Archivo:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     LacrosseHub — design tokens
+     Aesthetic: a stadium "scorebug at night" — disciplined dark
+     surface, condensed broadcast display type, monospace game
+     clocks, and team-color spines so the league's own identity
+     (not a lonely single accent) carries the color.
+     RED is reserved as a meaning: LIVE, the playoff cutoff line,
+     and elimination. Blue is the interactive/affordance color.
+     ============================================================ */
+  :root{
+    --bg:#0C0E13;
+    --bg-glow:#13202b;
+    --panel:#13161F;
+    --surface:#191D28;
+    --surface-2:#1F2431;
+    --line:#262C3A;
+    --line-soft:#1E2330;
+    --ink:#F3F5FA;
+    --ink-dim:#9BA3B4;
+    --ink-faint:#646C7D;
+    --accent:#2E9BFF;       /* interactive / focus / "open box score" */
+    --accent-soft:#16344f;
+    --live:#FF3B3B;         /* LIVE + playoff cutoff + eliminated */
+    --live-soft:#3a1417;
+    --win:#27C281;          /* W / positive */
+    --radius:14px;
+    --radius-sm:9px;
+    --display:"Saira Condensed","Arial Narrow",sans-serif;
+    --body:"Archivo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --mono:"Spline Sans Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 520px at 50% -8%, var(--bg-glow) 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .tnum{font-variant-numeric:tabular-nums}
+
+  /* ---------- App shell: header + 2x2 grid that fills the screen ---------- */
+  .app{display:flex;flex-direction:column;height:100%;min-height:0}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:14px clamp(14px,3vw,30px);
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+    flex:none;
+  }
+  .brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+  .brand__mark{
+    font-family:var(--display);font-weight:800;letter-spacing:.04em;
+    font-size:clamp(22px,3.4vw,30px);line-height:1;text-transform:uppercase;
+  }
+  .brand__mark .lax{color:var(--ink)}
+  .brand__mark .hub{
+    color:var(--bg);background:var(--accent);
+    padding:2px 8px;border-radius:6px;margin-left:2px;
+  }
+  .brand__tag{
+    font-family:var(--mono);font-size:11px;color:var(--ink-faint);
+    letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;
+  }
+  .topmeta{display:flex;align-items:center;gap:14px;flex:none}
+  .week{
+    font-family:var(--display);font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;font-size:14px;color:var(--ink-dim);white-space:nowrap;
+  }
+  .livepill{
+    display:none;align-items:center;gap:7px;
+    font-family:var(--display);font-weight:700;letter-spacing:.1em;
+    font-size:12px;text-transform:uppercase;color:#fff;
+    background:var(--live-soft);border:1px solid rgba(255,59,59,.4);
+    padding:5px 10px;border-radius:999px;
+  }
+  .livepill.on{display:inline-flex}
+
+  .grid{
+    flex:1;min-height:0;
+    display:grid;gap:14px;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    padding:14px clamp(14px,3vw,30px) clamp(14px,3vw,26px);
+  }
+
+  /* ---------- Panel ---------- */
+  .panel{
+    display:flex;flex-direction:column;min-height:0;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+    animation:rise .5s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .panel:nth-child(1){animation-delay:.02s}
+  .panel:nth-child(2){animation-delay:.08s}
+  .panel:nth-child(3){animation-delay:.14s}
+  .panel:nth-child(4){animation-delay:.20s}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .panel__head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+    padding:13px 16px 11px;
+    border-bottom:1px solid var(--line);
+    flex:none;
+  }
+  .panel__title{
+    font-family:var(--display);font-weight:800;letter-spacing:.1em;
+    text-transform:uppercase;font-size:clamp(15px,1.9vw,18px);
+    display:flex;align-items:center;gap:9px;
+  }
+  .panel__title::before{
+    content:"";width:6px;height:18px;border-radius:2px;background:var(--accent);
+    transform:skewX(-12deg);
+  }
+  .panel__hint{font-size:11.5px;color:var(--ink-faint);letter-spacing:.02em}
+  .panel__body{padding:8px 10px 12px;overflow-y:auto;min-height:0;flex:1}
+  .panel__body::-webkit-scrollbar{width:9px}
+  .panel__body::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;border:2px solid var(--panel)}
+  .panel__body{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+
+  /* ---------- Team badge ---------- */
+  .badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:var(--display);font-weight:800;letter-spacing:.02em;
+    border-radius:6px;flex:none;
+  }
+  .badge--sm{width:30px;height:24px;font-size:12px}
+  .badge--md{width:40px;height:30px;font-size:14px}
+  .badge--lg{width:54px;height:40px;font-size:18px}
+
+  /* ---------- Scores ---------- */
+  .game{
+    width:100%;text-align:left;cursor:pointer;
+    background:var(--surface);border:1px solid var(--line-soft);
+    border-radius:var(--radius-sm);
+    padding:11px 12px 11px 14px;margin:6px 4px;
+    display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;
+    color:inherit;font-family:inherit;
+    transition:transform .14s ease, border-color .14s ease, background .14s ease;
+    position:relative;
+  }
+  .game::before{
+    content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;
+    background:linear-gradient(var(--ca), var(--cb));
+  }
+  .game:hover,.game:focus-visible{
+    transform:translateY(-2px);border-color:var(--accent);background:var(--surface-2);outline:none;
+  }
+  .game:hover .game__open,.game:focus-visible .game__open{color:var(--accent)}
+  .game__teams{display:flex;flex-direction:column;gap:7px;min-width:0}
+  .trow{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:10px}
+  .trow .tname{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .trow .tname .city{color:var(--ink-faint);font-weight:500;font-size:12px;margin-left:5px}
+  .trow.win .tname{color:var(--ink)}
+  .trow.lose .tname{color:var(--ink-dim)}
+  .trow .tscore{font-family:var(--display);font-weight:800;font-size:22px;line-height:1}
+  .trow.lose .tscore{color:var(--ink-dim)}
+  .trow .winmark{color:var(--win);font-weight:800;font-size:11px;margin-left:6px}
+  .game__side{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+  .status{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-dim);white-space:nowrap}
+  .status.final{color:var(--ink-faint);text-transform:uppercase;letter-spacing:.14em}
+  .status.live{color:var(--live);display:inline-flex;align-items:center;gap:6px;font-weight:600}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(255,59,59,.6);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,59,59,.55)}70%{box-shadow:0 0 0 7px rgba(255,59,59,0)}100%{box-shadow:0 0 0 0 rgba(255,59,59,0)}}
+  .game__open{font-size:11px;color:var(--ink-faint);letter-spacing:.02em;display:flex;align-items:center;gap:4px}
+  .game__open svg{width:13px;height:13px}
+
+  /* ---------- Standings ---------- */
+  .conf{margin:4px 4px 14px}
+  .conf__name{
+    font-family:var(--display);font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    font-size:12.5px;color:var(--ink-dim);padding:6px 6px 8px;
+  }
+  table.stand{width:100%;border-collapse:collapse}
+  table.stand th{
+    font-family:var(--body);font-weight:600;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-faint);text-align:right;padding:0 8px 7px;border-bottom:1px solid var(--line);
+  }
+  table.stand th.l-team{text-align:left}
+  table.stand td{padding:9px 8px;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+  table.stand td.num{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-dim)}
+  table.stand td.pos{color:var(--ink-faint);font-family:var(--mono);font-size:12px;width:22px}
+  table.stand td.wins{color:var(--ink);font-weight:700}
+  .team-cell{display:flex;align-items:center;gap:10px}
+  .team-cell .nm{font-weight:600}
+  .team-cell .ct{color:var(--ink-faint);font-weight:500;font-size:11.5px}
+  tr.out td{color:var(--ink-faint)}
+  tr.out .nm{color:var(--ink-dim)}
+  tr.out .badge{opacity:.62}
+  .tag-out{
+    font-family:var(--display);font-weight:700;font-size:9.5px;letter-spacing:.12em;
+    color:var(--live);background:var(--live-soft);border:1px solid rgba(255,59,59,.35);
+    border-radius:4px;padding:1px 5px;margin-left:8px;text-transform:uppercase;
+  }
+  /* the signature: bold red playoff cutoff line */
+  tr.cutoff td{padding:0;border:none}
+  .cutline{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 4px 7px;
+  }
+  .cutline__rule{height:3px;flex:1;background:var(--live);border-radius:3px;box-shadow:0 0 12px rgba(255,59,59,.35)}
+  .cutline__label{
+    font-family:var(--display);font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    font-size:10px;color:var(--live);white-space:nowrap;display:flex;align-items:center;gap:6px;
+  }
+  .cutline__label small{color:var(--ink-faint);font-family:var(--body);font-weight:600;letter-spacing:.08em}
+
+  /* ---------- Schedule ---------- */
+  .sday{margin:4px 4px 14px}
+  .sday__h{
+    font-family:var(--display);font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    font-size:12px;color:var(--ink-dim);padding:6px 6px 8px;border-bottom:1px solid var(--line);
+  }
+  .srow{
+    display:grid;grid-template-columns:74px 1fr auto;align-items:center;gap:12px;
+    padding:11px 6px;border-bottom:1px solid var(--line-soft);
+  }
+  .srow__time{font-family:var(--mono);font-size:12px;color:var(--ink-dim);line-height:1.35}
+  .srow__time .net{display:block;font-size:10px;color:var(--accent);letter-spacing:.06em;margin-top:3px}
+  .srow__match{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:13.5px}
+  .srow__match .vs{color:var(--ink-faint);font-size:11px;font-weight:600;letter-spacing:.06em}
+  .srow__match .nm{font-weight:600}
+  .srow__res{text-align:right;white-space:nowrap}
+  .srow__res .sc{font-family:var(--display);font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+  .srow__res .lbl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;margin-top:2px}
+  .srow__res .lbl.live{color:var(--live)}
+
+  /* ---------- Statistics ---------- */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:2px 4px}
+  .sblock{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius-sm);padding:11px 12px}
+  .sblock__h{
+    font-family:var(--display);font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    font-size:12px;color:var(--ink);margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;
+  }
+  .sblock__h .unit{font-family:var(--body);font-weight:600;font-size:9.5px;letter-spacing:.1em;color:var(--ink-faint)}
+  .lrow{display:grid;grid-template-columns:16px 30px 1fr auto;align-items:center;gap:9px;padding:5px 0}
+  .lrow .lr{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+  .lrow:first-of-type .lr{color:var(--accent)}
+  .lrow .ln{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lrow .lv{font-family:var(--display);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+  .lrow:first-of-type .lv{color:var(--accent)}
+
+  /* ---------- Footer note ---------- */
+  .footnote{
+    flex:none;padding:9px clamp(14px,3vw,30px);border-top:1px solid var(--line);
+    font-size:11px;color:var(--ink-faint);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  .footnote b{color:var(--ink-dim);font-weight:600}
+
+  /* ---------- Modal: box score ---------- */
+  .modal{position:fixed;inset:0;z-index:50;display:none}
+  .modal.open{display:block}
+  .modal__bg{position:absolute;inset:0;background:rgba(6,8,12,.72);backdrop-filter:blur(3px);animation:fade .2s ease both}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .sheet{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(680px,calc(100vw - 28px));max-height:min(88vh,820px);
+    background:var(--panel);border:1px solid var(--line);border-radius:18px;
+    display:flex;flex-direction:column;overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
+    animation:pop .26s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes pop{from{opacity:0;transform:translate(-50%,-46%) scale(.97)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+  .sheet__head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:16px 18px;border-bottom:1px solid var(--line);flex:none;
+  }
+  .bs-score{display:flex;align-items:center;gap:14px}
+  .bs-team{display:flex;align-items:center;gap:10px}
+  .bs-team .nm{font-weight:600;font-size:14px}
+  .bs-team .sc{font-family:var(--display);font-weight:800;font-size:30px;line-height:1}
+  .bs-team.lose .sc,.bs-team.lose .nm{color:var(--ink-dim)}
+  .bs-at{color:var(--ink-faint);font-family:var(--display);font-weight:700;font-size:16px}
+  .sheet__close{
+    background:var(--surface);border:1px solid var(--line);color:var(--ink-dim);
+    width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:18px;line-height:1;flex:none;
+    transition:border-color .14s,color .14s;
+  }
+  .sheet__close:hover,.sheet__close:focus-visible{border-color:var(--accent);color:var(--ink);outline:none}
+  .sheet__sub{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--ink-faint);padding:10px 18px 0;text-transform:uppercase}
+  .sheet__sub .live{color:var(--live)}
+  .sheet__body{padding:14px 18px 20px;overflow-y:auto;min-height:0}
+  .sheet__body{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+
+  .bs-section{
+    font-family:var(--display);font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    font-size:11px;color:var(--ink-faint);margin:18px 2px 8px;
+  }
+  table.line{width:100%;border-collapse:collapse;margin-top:4px}
+  table.line th,table.line td{padding:8px 6px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}
+  table.line th{font-size:10px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;border-bottom:1px solid var(--line)}
+  table.line td.lt{text-align:left}
+  table.line td{border-bottom:1px solid var(--line-soft)}
+  table.line td.tot{font-family:var(--display);font-weight:800;font-size:15px}
+  table.line .badge{vertical-align:middle}
+
+  .cmp{display:flex;flex-direction:column;gap:1px}
+  .cmp__row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid var(--line-soft)}
+  .cmp__row .a{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .cmp__row .b{text-align:left;font-variant-numeric:tabular-nums;font-weight:600}
+  .cmp__row .lab{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);text-align:center;min-width:120px}
+
+  .perf{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .perf__team{min-width:0}
+  .perf__team h4{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:13px;font-weight:700}
+  .perf__list{display:flex;flex-direction:column;gap:2px}
+  .pline{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:12.5px;padding:4px 0;border-bottom:1px solid var(--line-soft)}
+  .pline .pn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pline .pv{font-family:var(--mono);font-size:11px;color:var(--ink-dim);white-space:nowrap}
+  .pline.spec .pn{color:var(--ink-dim)}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1080px){
+    .perf{grid-template-columns:1fr}
+  }
+  @media (max-width: 880px){
+    .app{height:auto;min-height:100%}
+    .grid{
+      display:flex;flex-direction:column;
+      height:auto;padding-bottom:20px;
+    }
+    .panel{min-height:0}
+    .panel__body{overflow:visible;max-height:none}
+    .stat-grid{grid-template-columns:1fr}
+    .brand__tag{display:none}
+  }
+  @media (max-width: 560px){
+    table.stand th.opt,table.stand td.opt{display:none}
+    .stat-grid{grid-template-columns:1fr}
+    .cmp__row .lab{min-width:90px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important}
+    .dot{animation:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand__mark"><span class="lax">LACROSSE</span><span class="hub">HUB</span></span>
+      <span class="brand__tag">Premier Lacrosse League</span>
+    </div>
+    <div class="topmeta">
+      <span class="livepill" id="livePill"><span class="dot"></span> Live now</span>
+      <span class="week" id="weekLabel"></span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <!-- 1. SCORES -->
+    <section class="panel" aria-labelledby="t-scores">
+      <div class="panel__head">
+        <h2 class="panel__title" id="t-scores">Scores</h2>
+        <span class="panel__hint">Tap a game for the box score</span>
+      </div>
+      <div class="panel__body" id="scores"></div>
+    </section>
+
+    <!-- 2. STANDINGS -->
+    <section class="panel" aria-labelledby="t-standings">
+      <div class="panel__head">
+        <h2 class="panel__title" id="t-standings">Standings</h2>
+        <span class="panel__hint">Top 3 per conference make the playoffs</span>
+      </div>
+      <div class="panel__body" id="standings"></div>
+    </section>
+
+    <!-- 3. SCHEDULE -->
+    <section class="panel" aria-labelledby="t-schedule">
+      <div class="panel__head">
+        <h2 class="panel__title" id="t-schedule">Schedule</h2>
+        <span class="panel__hint" id="scheduleHint">This week · all times ET</span>
+      </div>
+      <div class="panel__body" id="schedule"></div>
+    </section>
+
+    <!-- 4. STATISTICS -->
+    <section class="panel" aria-labelledby="t-stats">
+      <div class="panel__head">
+        <h2 class="panel__title" id="t-stats">Statistics</h2>
+        <span class="panel__hint">Season leaders</span>
+      </div>
+      <div class="panel__body">
+        <div class="stat-grid" id="stats"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footnote">
+    <span id="srcNote"></span>
+    <span>Updated <span id="updated"></span> · all times ET</span>
+  </footer>
+</div>
+
+<!-- Box-score modal -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="bsScore" aria-hidden="true">
+  <div class="modal__bg" data-close></div>
+  <div class="sheet" role="document">
+    <div class="sheet__head">
+      <div class="bs-score" id="bsScore"></div>
+      <button class="sheet__close" id="bsClose" aria-label="Close box score">×</button>
+    </div>
+    <div class="sheet__sub" id="bsSub"></div>
+    <div class="sheet__body" id="bsBody"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+   LacrosseHub renders from one object — see sampleData() below for
+   the exact shape the scraper must produce. loadData() tries to
+   fetch a live data.json (written by /scraper); if it isn't there
+   yet it falls back to the built-in sample so the page always works.
+   ============================================================ */
+let IS_LIVE = false;
+
+async function loadData(){
+  try{
+    const res = await fetch("data.json", { cache:"no-store" });
+    if(res.ok) { IS_LIVE = true; return await res.json(); }
+  }catch(e){ /* offline, file://, or no data.json yet — use sample */ }
+  IS_LIVE = false;
+  return sampleData();
+}
+
+// Team identities. Colors are approximate and easy to edit.
+const TEAMS = {
+  BOS:{city:"Boston",       name:"Cannons",    conf:"East", color:"#00B388", ink:"#04231B"},
+  MD: {city:"Maryland",     name:"Whipsnakes", conf:"East", color:"#F2C200", ink:"#2A2300"},
+  NY: {city:"New York",     name:"Atlas",      conf:"East", color:"#5B6BFF", ink:"#FFFFFF"},
+  PHI:{city:"Philadelphia", name:"Waterdogs",  conf:"East", color:"#36C5F0", ink:"#04222B"},
+  CAL:{city:"California",   name:"Redwoods",   conf:"West", color:"#C45B3C", ink:"#FFFFFF"},
+  CAR:{city:"Carolina",     name:"Chaos",      conf:"West", color:"#C44FE0", ink:"#FFFFFF"},
+  DEN:{city:"Denver",       name:"Outlaws",    conf:"West", color:"#F2811D", ink:"#241200"},
+  UTA:{city:"Utah",         name:"Archers",    conf:"West", color:"#7BC043", ink:"#13260A"},
+};
+
+// How many teams per conference make the playoffs (everyone below the
+// red cutoff line is "out"). Change this one number to move the line.
+const PLAYOFF_SPOTS = 3;
+
+function sampleData(){
+  return {
+    week: "Week 5",
+    season: "Summer 2026",
+    updated: "Sun, Jun 14 · 2:38 PM",
+    scheduleLabel: "This week · Jun 12–14",
+
+    // Most recent / live results (Scores box). Each game carries a full
+    // box score so any card opens a complete modal.
+    games: [
+      {
+        id:"g1", status:"live", clock:"Q3 · 7:42", date:"Sun, Jun 14",
+        away:{tri:"CAL", q:[3,3,3]}, home:{tri:"DEN", q:[4,3,4]},
+        box:{
+          away:{ stats:{Shots:32,"Shots on goal":21,Faceoffs:"9–14","Ground balls":24,"Caused turnovers":6,Saves:11,Penalties:2},
+            scorers:[["R. Pannell","2g 2a"],["J. Hannah","2g 1a"],["S. Bonafede","2g"]],
+            goalie:["D. Ward","11 sv / 20 sh"], fo:["T. Ierlan","9–14"] },
+          home:{ stats:{Shots:38,"Shots on goal":25,Faceoffs:"14–9","Ground balls":29,"Caused turnovers":8,Saves:9,Penalties:1},
+            scorers:[["L. Wisnauskas","4g 1a"],["R. Dennis","3g"],["E. Salama","1g 2a"]],
+            goalie:["P. Carey","9 sv / 21 sh"], fo:["J. Inacio","14–9"] }
+        }
+      },
+      {
+        id:"g2", status:"final", clock:"Final", date:"Sat, Jun 13",
+        away:{tri:"NY", q:[3,4,2,3]}, home:{tri:"PHI", q:[2,3,4,4]},
+        box:{
+          away:{ stats:{Shots:41,"Shots on goal":26,Faceoffs:"15–12","Ground balls":30,"Caused turnovers":9,Saves:14,Penalties:3},
+            scorers:[["C. Shellenberger","3g 4a"],["B. O'Neill","4g"],["M. Holman","2g 1a"]],
+            goalie:["L. Entenmann","14 sv / 27 sh"], fo:["T. Baptiste","15–12"] },
+          home:{ stats:{Shots:39,"Shots on goal":28,Faceoffs:"12–15","Ground balls":33,"Caused turnovers":11,Saves:13,Penalties:2},
+            scorers:[["M. Sowers","2g 5a"],["J. Hannah","3g 1a"],["Z. Currier","2g 1a"]],
+            goalie:["M. Gvozden","13 sv / 25 sh"], fo:["J. O'Connell","12–15"] }
+        }
+      },
+      {
+        id:"g3", status:"final", clock:"Final", date:"Sat, Jun 13",
+        away:{tri:"CAR", q:[3,2,2,3]}, home:{tri:"UTA", q:[2,3,3,3]},
+        box:{
+          away:{ stats:{Shots:36,"Shots on goal":22,Faceoffs:"12–17","Ground balls":28,"Caused turnovers":14,Saves:14,Penalties:4},
+            scorers:[["A. Fenton","3g 1a"],["T. Heaney","2g 2a"],["D. Curry","2g"]],
+            goalie:["B. Riorden","14 sv / 25 sh"], fo:["P. LaSalla","12–17"] },
+          home:{ stats:{Shots:53,"Shots on goal":24,Faceoffs:"17–12","Ground balls":31,"Caused turnovers":8,Saves:14,Penalties:1},
+            scorers:[["M. O'Keefe","4g 1a"],["T. Leclaire","1g 4a"],["C. Kavanagh","2g 1a"]],
+            goalie:["B. Dobson","14 sv / 24 sh"], fo:["M. Sisselberger","17–12"] }
+        }
+      },
+      {
+        id:"g4", status:"final", clock:"Final", date:"Fri, Jun 12",
+        away:{tri:"BOS", q:[2,3,1,3]}, home:{tri:"MD", q:[5,4,3,4]},
+        box:{
+          away:{ stats:{Shots:35,"Shots on goal":20,Faceoffs:"10–17","Ground balls":27,"Caused turnovers":7,Saves:11,Penalties:3},
+            scorers:[["A. Nolting","3g 1a"],["L. Thompson","2g 2a"],["M. Campbell","2g"]],
+            goalie:["C. Kirst","11 sv / 27 sh"], fo:["J. Kelly","10–17"] },
+          home:{ stats:{Shots:44,"Shots on goal":31,Faceoffs:"17–10","Ground balls":34,"Caused turnovers":10,Saves:11,Penalties:2},
+            scorers:[["T. Malone","5g 2a"],["J. Hawke","3g 2a"],["K. Khan","2g 3a"]],
+            goalie:["L. McNaney","11 sv / 20 sh"], fo:["L. Heil","17–10"] }
+        }
+      }
+    ],
+
+    // W–L plus points for / against and current streak.
+    standings: {
+      East:[
+        {tri:"MD",  w:4, l:1, pf:74, pa:58, strk:"W2"},
+        {tri:"PHI", w:3, l:2, pf:69, pa:61, strk:"W1"},
+        {tri:"NY",  w:2, l:3, pf:71, pa:70, strk:"L2"},
+        {tri:"BOS", w:1, l:4, pf:55, pa:80, strk:"L3"},
+      ],
+      West:[
+        {tri:"DEN", w:4, l:1, pf:78, pa:60, strk:"W3"},
+        {tri:"CAL", w:3, l:2, pf:64, pa:59, strk:"W1"},
+        {tri:"UTA", w:2, l:3, pf:58, pa:62, strk:"L1"},
+        {tri:"CAR", w:1, l:4, pf:60, pa:79, strk:"L2"},
+      ]
+    },
+
+    // This week's slate, grouped by day, with tip times + network.
+    schedule: [
+      { day:"Fri · Jun 12", games:[
+        { away:"BOS", home:"MD", time:"7:00 PM", net:"ESPN2", result:{away:9, home:16} },
+      ]},
+      { day:"Sat · Jun 13", games:[
+        { away:"CAR", home:"UTA", time:"3:00 PM", net:"ESPN+", result:{away:10, home:11} },
+        { away:"NY", home:"PHI", time:"5:30 PM", net:"ABC",  result:{away:12, home:13} },
+      ]},
+      { day:"Sun · Jun 14", games:[
+        { away:"CAL", home:"DEN", time:"1:00 PM", net:"ESPN", live:{away:9, home:11} },
+      ]},
+    ],
+
+    // Season leaders for the six requested categories.
+    stats: {
+      "Goals":             { unit:"G",   rows:[["L. Wisnauskas","DEN",22],["M. O'Keefe","UTA",20],["B. O'Neill","NY",19],["C. Shellenberger","NY",18]] },
+      "Assists":           { unit:"A",   rows:[["T. Leclaire","UTA",18],["C. Shellenberger","NY",17],["M. Sowers","PHI",16],["J. Teat","NY",15]] },
+      "Points":            { unit:"PTS", rows:[["C. Shellenberger","NY",35],["L. Wisnauskas","DEN",31],["M. O'Keefe","UTA",30],["M. Sowers","PHI",28]] },
+      "Caused Turnovers":  { unit:"CT",  rows:[["B. Makar","NY",15],["J. Rowlett","CAR",14],["L. Byrnes","UTA",13],["JT Giles-Harris","CAL",12]] },
+      "Saves":             { unit:"SV",  rows:[["D. Ward","CAL",64],["L. McNaney","MD",61],["B. Dobson","UTA",58],["L. Entenmann","NY",55]] },
+      "Faceoff %":         { unit:"FO%", rows:[["T. Baptiste","NY",64.8],["T. Ierlan","CAL",60.6],["M. Sisselberger","UTA",58.2],["J. Inacio","DEN",55.5]] },
+    }
+  };
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const $ = (s, r=document) => r.querySelector(s);
+const el = (t, c) => { const n=document.createElement(t); if(c) n.className=c; return n; };
+const team = tri => TEAMS[tri] || {city:tri,name:"",color:"#666",ink:"#fff",conf:""};
+
+function badge(tri, size="sm"){
+  const t = team(tri);
+  return `<span class="badge badge--${size}" style="background:${t.color};color:${t.ink}">${tri}</span>`;
+}
+const sum = a => a.reduce((x,y)=>x+(y||0),0);
+
+let DATA;
+
+async function render(){
+  DATA = await loadData();
+  $("#weekLabel").textContent = `${DATA.week} · ${DATA.season}`;
+  $("#updated").textContent = DATA.updated || "—";
+  $("#scheduleHint").textContent = `${DATA.scheduleLabel || "This week"} · all times ET`;
+  $("#livePill").classList.toggle("on", DATA.games.some(g=>g.status==="live"));
+  $("#srcNote").innerHTML = IS_LIVE
+    ? `<b>Live data</b> from the scraper.`
+    : `<b>Sample data</b> shown — run the scraper to go live.`;
+
+  renderScores();
+  renderStandings();
+  renderSchedule();
+  renderStats();
+}
+
+function renderScores(){
+  const wrap = $("#scores"); wrap.innerHTML = "";
+  // live first, then most recent finals
+  const ordered = [...DATA.games].sort((a,b)=> (a.status==="live"?-1:0) - (b.status==="live"?-1:0));
+  ordered.forEach(g=>{
+    const aT=team(g.away.tri), hT=team(g.home.tri);
+    const aS=sum(g.away.q), hS=sum(g.home.q);
+    const aWin = aS>hS, hWin = hS>aS;
+    const statusHTML = g.status==="live"
+      ? `<span class="status live"><span class="dot"></span>${g.clock}</span>`
+      : `<span class="status final">Final</span>`;
+
+    const card = el("button","game");
+    card.style.setProperty("--ca", aT.color);
+    card.style.setProperty("--cb", hT.color);
+    card.setAttribute("data-game", g.id);
+    card.setAttribute("aria-label", `${aT.city} ${aT.name} ${aS}, ${hT.city} ${hT.name} ${hS}. ${g.status==="live"?"Live, "+g.clock:"Final"}. Open box score.`);
+    card.innerHTML = `
+      <div class="game__teams">
+        <div class="trow ${g.status!=="live" ? (aWin?"win":"lose"):""}">
+          ${badge(g.away.tri)}
+          <span class="tname">${aT.name}<span class="city">${aT.city}</span></span>
+          <span class="tscore tnum">${aS}${aWin&&g.status!=="live"?'<span class="winmark">▸</span>':''}</span>
+        </div>
+        <div class="trow ${g.status!=="live" ? (hWin?"win":"lose"):""}">
+          ${badge(g.home.tri)}
+          <span class="tname">${hT.name}<span class="city">${hT.city}</span></span>
+          <span class="tscore tnum">${hS}${hWin&&g.status!=="live"?'<span class="winmark">▸</span>':''}</span>
+        </div>
+      </div>
+      <div class="game__side">
+        ${statusHTML}
+        <span class="game__open">Box score
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </span>
+      </div>`;
+    card.addEventListener("click", ()=>openModal(g.id));
+    wrap.appendChild(card);
+  });
+}
+
+function renderStandings(){
+  const wrap = $("#standings"); wrap.innerHTML = "";
+  [["East","Eastern Conference"],["West","Western Conference"]].forEach(([key,label])=>{
+    const rows = [...DATA.standings[key]].sort((a,b)=> (b.w-b.l)-(a.w-a.l) || (b.pf-b.pa)-(a.pf-a.pa) || b.w-a.w);
+    const conf = el("div","conf");
+    conf.innerHTML = `<div class="conf__name">${label}</div>`;
+    const tbl = el("table","stand");
+    tbl.innerHTML = `<thead><tr>
+        <th></th><th class="l-team">Team</th>
+        <th>W</th><th>L</th>
+        <th class="opt">PF</th><th class="opt">PA</th><th class="opt">Strk</th>
+      </tr></thead>`;
+    const tb = el("tbody");
+    rows.forEach((r,i)=>{
+      // bold red cutoff line before the first team that misses the playoffs
+      if (i === PLAYOFF_SPOTS){
+        const cut = el("tr","cutoff");
+        cut.innerHTML = `<td colspan="7"><div class="cutline">
+            <span class="cutline__label">Playoff cutoff <small>· out below</small></span>
+            <span class="cutline__rule"></span>
+          </div></td>`;
+        tb.appendChild(cut);
+      }
+      const t = team(r.tri);
+      const out = i >= PLAYOFF_SPOTS;
+      const tr = el("tr", out?"out":"");
+      tr.innerHTML = `
+        <td class="pos">${i+1}</td>
+        <td><div class="team-cell">${badge(r.tri)}<span><span class="nm">${t.name}</span> <span class="ct">${t.city}</span></span>${out?'<span class="tag-out">Out</span>':''}</div></td>
+        <td class="num wins">${r.w}</td>
+        <td class="num">${r.l}</td>
+        <td class="num opt">${r.pf}</td>
+        <td class="num opt">${r.pa}</td>
+        <td class="num opt">${r.strk}</td>`;
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb);
+    conf.appendChild(tbl);
+    wrap.appendChild(conf);
+  });
+}
+
+function renderSchedule(){
+  const wrap = $("#schedule"); wrap.innerHTML = "";
+  DATA.schedule.forEach(day=>{
+    const d = el("div","sday");
+    d.innerHTML = `<div class="sday__h">${day.day}</div>`;
+    day.games.forEach(g=>{
+      const aT=team(g.away), hT=team(g.home);
+      let res;
+      if (g.live){
+        res = `<div class="srow__res"><span class="sc tnum">${g.live.away}–${g.live.home}</span><span class="lbl live">● Live</span></div>`;
+      } else if (g.result){
+        res = `<div class="srow__res"><span class="sc tnum">${g.result.away}–${g.result.home}</span><span class="lbl">Final</span></div>`;
+      } else {
+        res = `<div class="srow__res"><span class="lbl">${g.time}</span></div>`;
+      }
+      const row = el("div","srow");
+      row.innerHTML = `
+        <div class="srow__time">${g.time}<span class="net">${g.net}</span></div>
+        <div class="srow__match">
+          ${badge(g.away)}<span class="nm">${aT.name}</span>
+          <span class="vs">at</span>
+          ${badge(g.home)}<span class="nm">${hT.name}</span>
+        </div>
+        ${res}`;
+      d.appendChild(row);
+    });
+    wrap.appendChild(d);
+  });
+}
+
+function renderStats(){
+  const wrap = $("#stats"); wrap.innerHTML = "";
+  Object.entries(DATA.stats).forEach(([cat, data])=>{
+    const b = el("div","sblock");
+    b.innerHTML = `<div class="sblock__h">${cat}<span class="unit">${data.unit}</span></div>`;
+    data.rows.forEach((r,i)=>{
+      const [name, tri, val] = r;
+      const row = el("div","lrow");
+      row.innerHTML = `
+        <span class="lr">${i+1}</span>
+        ${badge(tri)}
+        <span class="ln">${name}</span>
+        <span class="lv tnum">${val}</span>`;
+      b.appendChild(row);
+    });
+    wrap.appendChild(b);
+  });
+}
+
+/* ============================================================
+   BOX SCORE MODAL
+   ============================================================ */
+const modal = $("#modal");
+let lastFocus = null;
+
+function openModal(id){
+  const g = DATA.games.find(x=>x.id===id);
+  if(!g) return;
+  lastFocus = document.activeElement;
+  const aT=team(g.away.tri), hT=team(g.home.tri);
+  const aS=sum(g.away.q), hS=sum(g.home.q);
+  const live = g.status==="live";
+  const aWin = !live && aS>hS, hWin = !live && hS>aS;
+
+  $("#bsScore").innerHTML = `
+    <div class="bs-team ${aWin?'':(live?'':'lose')}">${badge(g.away.tri,"md")}<span class="nm">${aT.name}</span><span class="sc tnum">${aS}</span></div>
+    <span class="bs-at">@</span>
+    <div class="bs-team ${hWin?'':(live?'':'lose')}"><span class="sc tnum">${hS}</span><span class="nm">${hT.name}</span>${badge(g.home.tri,"md")}</div>`;
+  $("#bsSub").innerHTML = `${g.date} · ${live?`<span class="live">● Live — ${g.clock}</span>`:"Final"}`;
+
+  // build body
+  const body = $("#bsBody");
+  body.innerHTML = "";
+
+  // line score (only when we actually have per-quarter detail)
+  const hasQuarters = g.away.q.length>1 || g.home.q.length>1;
+  if(hasQuarters){
+    const qCount = Math.max(g.away.q.length, g.home.q.length, 4);
+    const qHead = Array.from({length:qCount},(_,i)=>`<th>${i+1}</th>`).join("");
+    const qCells = (q)=> Array.from({length:qCount},(_,i)=>`<td>${q[i]!=null?q[i]:'–'}</td>`).join("");
+    body.insertAdjacentHTML("beforeend", `
+      <div class="bs-section">Line score</div>
+      <table class="line">
+        <thead><tr><th class="lt">Team</th>${qHead}<th>T</th></tr></thead>
+        <tbody>
+          <tr><td class="lt">${badge(g.away.tri)} ${aT.name}</td>${qCells(g.away.q)}<td class="tot">${aS}</td></tr>
+          <tr><td class="lt">${badge(g.home.tri)} ${hT.name}</td>${qCells(g.home.q)}<td class="tot">${hS}</td></tr>
+        </tbody>
+      </table>`);
+  }
+
+  if(g.box){
+    // team stats compare
+    const ab = g.box.away.stats, hb = g.box.home.stats;
+    const cmp = Object.keys(ab).map(k=>`
+      <div class="cmp__row"><span class="a">${ab[k]}</span><span class="lab">${k}</span><span class="b">${hb[k]}</span></div>`).join("");
+    body.insertAdjacentHTML("beforeend", `
+      <div class="bs-section">Team stats</div>
+      <div class="cmp">
+        <div class="cmp__row" style="border-bottom:1px solid var(--line)">
+          <span class="a">${badge(g.away.tri)}</span><span class="lab"></span><span class="b">${badge(g.home.tri)}</span>
+        </div>${cmp}
+      </div>`);
+
+    // player stats (live stats / top performers)
+    const sideHTML = (side, tri)=>{
+      const t=team(tri);
+      const scorers = side.scorers.map(s=>`<div class="pline"><span class="pn">${s[0]}</span><span class="pv">${s[1]}</span></div>`).join("");
+      return `<div class="perf__team">
+          <h4>${badge(tri)} ${t.name}</h4>
+          <div class="perf__list">
+            ${scorers}
+            <div class="pline spec"><span class="pn">${side.goalie[0]} · GK</span><span class="pv">${side.goalie[1]}</span></div>
+            <div class="pline spec"><span class="pn">${side.fo[0]} · FO</span><span class="pv">${side.fo[1]}</span></div>
+          </div>
+        </div>`;
+    };
+    body.insertAdjacentHTML("beforeend", `
+      <div class="bs-section">${live?"Live player stats":"Top performers"}</div>
+      <div class="perf">${sideHTML(g.box.away,g.away.tri)}${sideHTML(g.box.home,g.home.tri)}</div>`);
+  } else {
+    body.insertAdjacentHTML("beforeend",
+      `<p style="color:var(--ink-faint);font-size:13px;line-height:1.5;margin:16px 2px 4px">Detailed box score for this game isn't wired up yet. See the scraper README to pull per-game line scores and player stats.</p>`);
+  }
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+  $("#bsClose").focus();
+}
+
+function closeModal(){
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden","true");
+  document.body.style.overflow="";
+  if(lastFocus) lastFocus.focus();
+}
+
+modal.addEventListener("click", e=>{ if(e.target.hasAttribute("data-close")) closeModal(); });
+$("#bsClose").addEventListener("click", closeModal);
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape" && modal.classList.contains("open")) closeModal();
+  // simple focus containment
+  if(e.key==="Tab" && modal.classList.contains("open")){
+    const f = modal.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+    if(!f.length) return;
+    const first=f[0], last=f[f.length-1];
+    if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+  }
+});
+
+render();
+
+// Quietly refresh live data every 45s. Skip while a box score is open so
+// the modal isn't torn out from under the reader.
+setInterval(() => {
+  if (!modal.classList.contains("open")) render();
+}, 45000);
+</script>
+</body>
+</html>
