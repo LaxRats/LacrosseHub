@@ -1,0 +1,138 @@
+{
+  "week": "",
+  "season": "Season 2026",
+  "updated": "Thu, Jun 18, 2:33 AM",
+  "scheduleLabel": "This week",
+  "games": [],
+  "standings": {
+    "East": [],
+    "West": []
+  },
+  "schedule": [],
+  "stats": {
+    "Goals": {
+      "unit": "G",
+      "rows": [
+        [
+          "?",
+          "DEN",
+          23
+        ],
+        [
+          "?",
+          "DEN",
+          19
+        ],
+        [
+          "?",
+          "DEN",
+          3
+        ]
+      ]
+    },
+    "Assists": {
+      "unit": "A",
+      "rows": [
+        [
+          "?",
+          "DEN",
+          8
+        ],
+        [
+          "?",
+          "DEN",
+          8
+        ],
+        [
+          "?",
+          "DEN",
+          7
+        ]
+      ]
+    },
+    "Points": {
+      "unit": "PTS",
+      "rows": [
+        [
+          "?",
+          "DEN",
+          34
+        ],
+        [
+          "?",
+          "DEN",
+          29
+        ],
+        [
+          "?",
+          "DEN",
+          12
+        ]
+      ]
+    },
+    "Caused Turnovers": {
+      "unit": "CT",
+      "rows": [
+        [
+          "?",
+          "DEN",
+          1
+        ],
+        [
+          "?",
+          "DEN",
+          0
+        ],
+        [
+          "?",
+          "DEN",
+          0
+        ]
+      ]
+    },
+    "Saves": {
+      "unit": "SV",
+      "rows": [
+        [
+          "?",
+          "DEN",
+          0
+        ],
+        [
+          "?",
+          "DEN",
+          0
+        ],
+        [
+          "?",
+          "DEN",
+          0
+        ]
+      ]
+    },
+    "Faceoff %": {
+      "unit": "FO%",
+      "rows": [
+        [
+          "?",
+          "DEN",
+          0
+        ],
+        [
+          "?",
+          "DEN",
+          0
+        ],
+        [
+          "?",
+          "DEN",
+          0
+        ]
+      ]
+    }
+  },
+  "_notes": [
+    "standings: no array with wins+losses found — inspect _debug/captured.full.json",
+    "games: no array with home/away teams found — inspect _debug/captured.full.json"
+  ]
+}
