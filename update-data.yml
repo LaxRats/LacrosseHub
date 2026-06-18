@@ -1,0 +1,56 @@
+name: Update LacrosseHub data
+
+# Runs the scraper on a schedule and commits data.json when it changes.
+# Tip: during the season lower the interval; off-season, disable this workflow.
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes (UTC). Use "*/5" on game days.
+  workflow_dispatch: {}       # lets you run it manually from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: true
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps + Chromium
+        working-directory: scraper
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Scrape
+        working-directory: scraper
+        run: npm run scrape
+
+      - name: Save debug captures (lets us fine-tune the data mapping)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-captures
+          path: scraper/_debug/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Commit data.json if changed
+        run: |
+          if [ -n "$(git status --porcelain data.json)" ]; then
+            git config user.name "lacrossehub-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data.json
+            git commit -m "data: refresh $(date -u +'%Y-%m-%dT%H:%MZ')"
+            git push
+          else
+            echo "No data changes."
+          fi
