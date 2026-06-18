@@ -1,0 +1,259 @@
+{
+  "week": "Week 5",
+  "season": "Summer 2026",
+  "updated": "Wed, Jun 17, 11:17 PM",
+  "scheduleLabel": "This week",
+  "games": [],
+  "standings": {
+    "East": [
+      {
+        "tri": "MD",
+        "w": 3,
+        "l": 1,
+        "pf": 51,
+        "pa": 37,
+        "strk": "W3"
+      },
+      {
+        "tri": "PHI",
+        "w": 2,
+        "l": 2,
+        "pf": 46,
+        "pa": 53,
+        "strk": "W1"
+      },
+      {
+        "tri": "BOS",
+        "w": 1,
+        "l": 3,
+        "pf": 49,
+        "pa": 53,
+        "strk": "L2"
+      },
+      {
+        "tri": "NY",
+        "w": 1,
+        "l": 3,
+        "pf": 42,
+        "pa": 52,
+        "strk": "L3"
+      }
+    ],
+    "West": [
+      {
+        "tri": "CAL",
+        "w": 2,
+        "l": 1,
+        "pf": 30,
+        "pa": 26,
+        "strk": "W1"
+      },
+      {
+        "tri": "CAR",
+        "w": 3,
+        "l": 2,
+        "pf": 55,
+        "pa": 60,
+        "strk": "W1"
+      },
+      {
+        "tri": "UTA",
+        "w": 2,
+        "l": 2,
+        "pf": 35,
+        "pa": 31,
+        "strk": "W1"
+      },
+      {
+        "tri": "DEN",
+        "w": 2,
+        "l": 2,
+        "pf": 44,
+        "pa": 49,
+        "strk": "L1"
+      }
+    ]
+  },
+  "schedule": [
+    {
+      "day": "Fri, Jun 19",
+      "games": [
+        {
+          "away": "BOS",
+          "home": "NY",
+          "time": "6:00 PM",
+          "net": "ESPN+"
+        },
+        {
+          "away": "UTA",
+          "home": "CAL",
+          "time": "8:30 PM",
+          "net": "ESPN+"
+        }
+      ]
+    },
+    {
+      "day": "Sat, Jun 20",
+      "games": [
+        {
+          "away": "MD",
+          "home": "NY",
+          "time": "9:00 PM",
+          "net": "ESPN 2"
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "Goals": {
+      "unit": "G",
+      "rows": [
+        [
+          "L. Wisnauskas",
+          "DEN",
+          12
+        ],
+        [
+          "A. Carroll",
+          "MD",
+          10
+        ],
+        [
+          "M. Holman",
+          "BOS",
+          9
+        ],
+        [
+          "J. Eicher",
+          "CAR",
+          9
+        ]
+      ]
+    },
+    "Assists": {
+      "unit": "A",
+      "rows": [
+        [
+          "M. Sowers",
+          "PHI",
+          8
+        ],
+        [
+          "B. O'Neill",
+          "DEN",
+          7
+        ],
+        [
+          "M. Boehm",
+          "CAL",
+          7
+        ],
+        [
+          "R. Pannell",
+          "MD",
+          5
+        ]
+      ]
+    },
+    "Points": {
+      "unit": "PTS",
+      "rows": [
+        [
+          "M. Sowers",
+          "PHI",
+          14
+        ],
+        [
+          "A. Carroll",
+          "MD",
+          13
+        ],
+        [
+          "L. Wisnauskas",
+          "DEN",
+          13
+        ],
+        [
+          "M. Holman",
+          "BOS",
+          13
+        ]
+      ]
+    },
+    "Caused Turnovers": {
+      "unit": "CT",
+      "rows": [
+        [
+          "B. Makar",
+          "NY",
+          10
+        ],
+        [
+          "A. Zapitello",
+          "MD",
+          8
+        ],
+        [
+          "M. Dunham",
+          "UTA",
+          8
+        ],
+        [
+          "M. Hudgins",
+          "PHI",
+          7
+        ]
+      ]
+    },
+    "Saves": {
+      "unit": "SV",
+      "rows": [
+        [
+          "L. Entenmann",
+          "NY",
+          60
+        ],
+        [
+          "M. DeLuca",
+          "PHI",
+          56
+        ],
+        [
+          "B. Riorden",
+          "CAR",
+          53
+        ],
+        [
+          "E. Carroll",
+          "MD",
+          52
+        ]
+      ]
+    },
+    "Faceoff %": {
+      "unit": "FO%",
+      "rows": [
+        [
+          "A. McMeekin",
+          "BOS",
+          66
+        ],
+        [
+          "T. Baptiste",
+          "NY",
+          60
+        ],
+        [
+          "M. Sisselberger",
+          "UTA",
+          58
+        ],
+        [
+          "N. LaLiberte",
+          "NY",
+          52
+        ]
+      ]
+    }
+  }
+}
