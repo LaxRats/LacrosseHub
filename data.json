@@ -1,7 +1,7 @@
 {
-  "week": "Week 5",
+  "week": "Week 6",
   "season": "Summer 2026",
-  "updated": "Wed, Jun 17, 11:17 PM",
+  "updated": "Mon, Jun 22, 9:31 PM",
   "scheduleLabel": "This week",
   "games": [],
   "standings": {
@@ -9,10 +9,18 @@
       {
         "tri": "MD",
         "w": 3,
-        "l": 1,
-        "pf": 51,
-        "pa": 37,
-        "strk": "W3"
+        "l": 2,
+        "pf": 65,
+        "pa": 53,
+        "strk": "L1"
+      },
+      {
+        "tri": "NY",
+        "w": 3,
+        "l": 3,
+        "pf": 70,
+        "pa": 77,
+        "strk": "W2"
       },
       {
         "tri": "PHI",
@@ -25,27 +33,19 @@
       {
         "tri": "BOS",
         "w": 1,
-        "l": 3,
-        "pf": 49,
-        "pa": 53,
-        "strk": "L2"
-      },
-      {
-        "tri": "NY",
-        "w": 1,
-        "l": 3,
-        "pf": 42,
-        "pa": 52,
+        "l": 4,
+        "pf": 60,
+        "pa": 65,
         "strk": "L3"
       }
     ],
     "West": [
       {
         "tri": "CAL",
-        "w": 2,
+        "w": 3,
         "l": 1,
-        "pf": 30,
-        "pa": 26,
+        "pf": 46,
+        "pa": 40,
         "strk": "W1"
       },
       {
@@ -57,35 +57,35 @@
         "strk": "W1"
       },
       {
-        "tri": "UTA",
-        "w": 2,
-        "l": 2,
-        "pf": 35,
-        "pa": 31,
-        "strk": "W1"
-      },
-      {
         "tri": "DEN",
         "w": 2,
         "l": 2,
         "pf": 44,
-        "pa": 49,
+        "pa": 40,
         "strk": "L1"
+      },
+      {
+        "tri": "UTA",
+        "w": 2,
+        "l": 3,
+        "pf": 49,
+        "pa": 47,
+        "strk": "W1"
       }
     ]
   },
   "schedule": [
     {
-      "day": "Fri, Jun 19",
+      "day": "Sat, Jun 27",
       "games": [
         {
-          "away": "BOS",
-          "home": "NY",
-          "time": "6:00 PM",
-          "net": "ESPN+"
+          "away": "MD",
+          "home": "DEN",
+          "time": "4:00 PM",
+          "net": "ESPN"
         },
         {
-          "away": "UTA",
+          "away": "BOS",
           "home": "CAL",
           "time": "8:30 PM",
           "net": "ESPN+"
@@ -93,13 +93,19 @@
       ]
     },
     {
-      "day": "Sat, Jun 20",
+      "day": "Sun, Jun 28",
       "games": [
         {
-          "away": "MD",
-          "home": "NY",
-          "time": "9:00 PM",
-          "net": "ESPN 2"
+          "away": "PHI",
+          "home": "UTA",
+          "time": "4:00 PM",
+          "net": "ESPN+"
+        },
+        {
+          "away": "CAR",
+          "home": "CAL",
+          "time": "6:30 PM",
+          "net": "ESPN+"
         }
       ]
     }
@@ -114,19 +120,19 @@
           12
         ],
         [
-          "A. Carroll",
-          "MD",
-          10
-        ],
-        [
           "M. Holman",
           "BOS",
-          9
+          12
         ],
         [
-          "J. Eicher",
-          "CAR",
-          9
+          "B. Costabile",
+          "NY",
+          12
+        ],
+        [
+          "A. Carroll",
+          "MD",
+          11
         ]
       ]
     },
@@ -134,24 +140,24 @@
       "unit": "A",
       "rows": [
         [
+          "C. Shellenberger",
+          "NY",
+          11
+        ],
+        [
+          "R. Pannell",
+          "MD",
+          10
+        ],
+        [
           "M. Sowers",
           "PHI",
           8
         ],
         [
-          "B. O'Neill",
-          "DEN",
-          7
-        ],
-        [
           "M. Boehm",
           "CAL",
-          7
-        ],
-        [
-          "R. Pannell",
-          "MD",
-          5
+          8
         ]
       ]
     },
@@ -159,24 +165,24 @@
       "unit": "PTS",
       "rows": [
         [
-          "M. Sowers",
-          "PHI",
-          14
+          "C. Shellenberger",
+          "NY",
+          19
         ],
         [
-          "A. Carroll",
-          "MD",
-          13
+          "B. Costabile",
+          "NY",
+          18
         ],
         [
-          "L. Wisnauskas",
-          "DEN",
-          13
+          "D. Molloy",
+          "CAL",
+          17
         ],
         [
           "M. Holman",
           "BOS",
-          13
+          16
         ]
       ]
     },
@@ -186,22 +192,22 @@
         [
           "B. Makar",
           "NY",
-          10
-        ],
-        [
-          "A. Zapitello",
-          "MD",
-          8
+          14
         ],
         [
           "M. Dunham",
           "UTA",
+          9
+        ],
+        [
+          "A. Zappitello",
+          "MD",
           8
         ],
         [
-          "M. Hudgins",
-          "PHI",
-          7
+          "M. Rexrode",
+          "NY",
+          8
         ]
       ]
     },
@@ -211,22 +217,47 @@
         [
           "L. Entenmann",
           "NY",
-          60
+          84
+        ],
+        [
+          "E. Carroll",
+          "MD",
+          64
+        ],
+        [
+          "D. Ward",
+          "CAL",
+          57
         ],
         [
           "M. DeLuca",
           "PHI",
           56
+        ]
+      ]
+    },
+    "Save %": {
+      "unit": "SV%",
+      "rows": [
+        [
+          "D. Ward",
+          "CAL",
+          60
         ],
         [
           "B. Riorden",
           "CAR",
-          53
+          58
         ],
         [
           "E. Carroll",
           "MD",
-          52
+          57
+        ],
+        [
+          "M. DeLuca",
+          "PHI",
+          55
         ]
       ]
     },
@@ -236,7 +267,7 @@
         [
           "A. McMeekin",
           "BOS",
-          66
+          65
         ],
         [
           "T. Baptiste",
@@ -244,16 +275,192 @@
           60
         ],
         [
-          "M. Sisselberger",
-          "UTA",
-          58
+          "T. Ierlan",
+          "CAL",
+          54
         ],
         [
-          "N. LaLiberte",
-          "NY",
+          "M. Sisselberger",
+          "UTA",
           52
         ]
       ]
+    }
+  },
+  "upcoming": [
+    {
+      "away": "MD",
+      "home": "DEN",
+      "day": "Sat, Jun 27",
+      "time": "4:00 PM",
+      "net": "ESPN"
+    },
+    {
+      "away": "BOS",
+      "home": "CAL",
+      "day": "Sat, Jun 27",
+      "time": "8:30 PM",
+      "net": "ESPN+"
+    },
+    {
+      "away": "PHI",
+      "home": "UTA",
+      "day": "Sun, Jun 28",
+      "time": "4:00 PM",
+      "net": "ESPN+"
+    },
+    {
+      "away": "CAR",
+      "home": "CAL",
+      "day": "Sun, Jun 28",
+      "time": "6:30 PM",
+      "net": "ESPN+"
+    }
+  ],
+  "teamLeaders": {
+    "BOS": {
+      "pts": {
+        "n": "M. Holman",
+        "v": 16
+      },
+      "sv": {
+        "n": "C. Kirst",
+        "v": 47.7
+      },
+      "ct": {
+        "n": "E. Rall",
+        "v": 6
+      },
+      "fo": {
+        "n": "A. McMeekin",
+        "v": 65.4
+      }
+    },
+    "MD": {
+      "pts": {
+        "n": "R. Pannell",
+        "v": 15
+      },
+      "sv": {
+        "n": "E. Carroll",
+        "v": 57.1
+      },
+      "ct": {
+        "n": "A. Zappitello",
+        "v": 8
+      },
+      "fo": {
+        "n": "P. LaSalla",
+        "v": 50.4
+      }
+    },
+    "NY": {
+      "pts": {
+        "n": "C. Shellenberger",
+        "v": 35
+      },
+      "sv": {
+        "n": "L. Entenmann",
+        "v": 55
+      },
+      "ct": {
+        "n": "B. Makar",
+        "v": 15
+      },
+      "fo": {
+        "n": "T. Baptiste",
+        "v": 64.8
+      }
+    },
+    "PHI": {
+      "pts": {
+        "n": "M. Sowers",
+        "v": 14
+      },
+      "sv": {
+        "n": "M. DeLuca",
+        "v": 55.4
+      },
+      "ct": {
+        "n": "M. Hudgins",
+        "v": 7
+      },
+      "fo": {
+        "n": "C. Farrell",
+        "v": 50.5
+      }
+    },
+    "CAL": {
+      "pts": {
+        "n": "D. Molloy",
+        "v": 17
+      },
+      "sv": {
+        "n": "D. Ward",
+        "v": 60
+      },
+      "ct": {
+        "n": "B. Farrare",
+        "v": 6
+      },
+      "fo": {
+        "n": "T. Ierlan",
+        "v": 54.6
+      }
+    },
+    "CAR": {
+      "pts": {
+        "n": "A. Fenton",
+        "v": 20
+      },
+      "sv": {
+        "n": "B. Riorden",
+        "v": 56
+      },
+      "ct": {
+        "n": "J. Rowlett",
+        "v": 14
+      },
+      "fo": {
+        "n": "P. LaSalla",
+        "v": 53
+      }
+    },
+    "DEN": {
+      "pts": {
+        "n": "L. Wisnauskas",
+        "v": 13
+      },
+      "sv": {
+        "n": "L. McNaney",
+        "v": 55.7
+      },
+      "ct": {
+        "n": "J. Piseno",
+        "v": 5
+      },
+      "fo": {
+        "n": "L. Wierman",
+        "v": 51.1
+      }
+    },
+    "UTA": {
+      "pts": {
+        "n": "C. Fields",
+        "v": 13
+      },
+      "sv": {
+        "n": "B. Dobson",
+        "v": 60
+      },
+      "ct": {
+        "n": "M. Dunham",
+        "v": 9
+      },
+      "fo": {
+        "n": "M. Sisselberger",
+        "v": 52.8
+      }
     }
   }
 }
